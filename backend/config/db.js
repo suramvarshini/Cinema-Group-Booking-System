@@ -78,6 +78,43 @@ async function tryConnectExisting(host, port, user, password, database) {
 async function initDatabase() {
   if (pool) return pool;
 
+  // Support cloud database connections (Render, Neon, Supabase, Heroku, AWS RDS)
+  if (process.env.DATABASE_URL) {
+    console.log(`[DB] Connecting to PostgreSQL via DATABASE_URL...`);
+    const sslConfig = process.env.DATABASE_SSL === 'false'
+      ? false
+      : (process.env.NODE_ENV === 'production' || process.env.DATABASE_URL.includes('sslmode=require') || process.env.DATABASE_URL.includes('render.com') || process.env.DATABASE_URL.includes('supabase') || process.env.DATABASE_URL.includes('neon')
+        ? { rejectUnauthorized: false }
+        : false);
+
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: sslConfig,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000
+    });
+
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    console.log(`[DB] Connected to PostgreSQL via DATABASE_URL successfully!`);
+
+    // Check if tables already exist; if not, run migrations automatically
+    const tableCheck = await client.query(`
+      SELECT to_regclass('public.movies') AS has_movies
+    `);
+    const needsMigration = !tableCheck.rows[0].has_movies;
+    client.release();
+
+    if (needsMigration) {
+      console.log(`[DB] Tables not found. Running automatic schema migration & seed...`);
+      const { runMigrations } = require('../database/migrate');
+      await runMigrations(pool);
+    }
+
+    return pool;
+  }
+
   console.log(`[DB] Checking PostgreSQL connection at ${PGHOST}:${PGPORT}/${PGDATABASE}...`);
   pool = await tryConnectExisting(PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE);
 

@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const { initDatabase, close } = require('./config/db');
@@ -46,6 +48,19 @@ app.use('/api/showtimes', showtimeRoutes);
 app.use('/api/seats', seatRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
+// Serve static frontend build in production (e.g., Render, Railway, Docker)
+const frontendDist = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  console.log(`[Static] Serving frontend static assets from ${frontendDist}`);
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 // Centralized Error Handler
 app.use(errorHandler);
