@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cinema_booking_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cinema_booking
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./backend/database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cinema_booking_backend
+    restart: always
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: password
+      PGDATABASE: cinema_booking
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cinema_booking_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

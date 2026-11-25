@@ -1,0 +1,24 @@
+{
+  "name": "cinema-group-booking-system",
+  "version": "1.0.0",
+  "description": "Cinema Group Ticket Booking System with PostgreSQL Mutex Row-Level Locking",
+  "scripts": {
+    "backend": "cd backend && npm.cmd start",
+    "backend:dev": "cd backend && npm.cmd run dev",
+    "frontend": "cd frontend && npm.cmd run dev",
+    "migrate": "cd backend && npm.cmd run migrate",
+    "test:concurrency": "cd backend && npm.cmd run test:concurrency"
+  },
+  "keywords": [
+    "cinema-booking",
+    "mutex",
+    "concurrency",
+    "postgresql",
+    "select-for-update",
+    "react",
+    "vite",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT"
+}

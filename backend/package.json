@@ -1,0 +1,32 @@
+{
+  "name": "cinema-booking-backend",
+  "version": "1.0.0",
+  "description": "Cinema Group Ticket Booking System Backend with PostgreSQL Mutex Row-Level Locking",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "migrate": "node database/migrate.js",
+    "test:concurrency": "node tests/concurrency.test.js"
+  },
+  "keywords": [
+    "cinema",
+    "booking",
+    "mutex",
+    "postgres",
+    "concurrency",
+    "row-level-locking"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "embedded-postgres": "^18.6.0-beta.19",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "axios": "^1.7.9"
+  }
+}
